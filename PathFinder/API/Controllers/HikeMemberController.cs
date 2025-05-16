@@ -18,26 +18,12 @@ namespace API.API.Controllers
             _hikeMemberService = hikeMemberService;
         }   
 
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<HikeMemberGetDTO>> GetHikeMember(long id)
-        //{
-        //    try
-        //    {
-        //        var hike = await _hikeMemberService.GetFullById(id);
-        //        return Ok(hike);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //}
-
         [HttpPost]
         public async Task<ActionResult> AddHikeMember(HikeMemberCreateDTO dto)
         {
             try
             {
-                if(!await _hikeMemberService.AccessAsAdmin(dto.HikeId, User.GetUserId())) 
+                if(!await _hikeMemberService.AccessAsAdminByHikeId(dto.HikeId, User.GetUserId())) 
                     return Forbid();
                 var id = await _hikeMemberService.Create(dto);
                 return Ok(id);
@@ -55,7 +41,7 @@ namespace API.API.Controllers
             {
                 if (await _hikeMemberService.AccessAsAdmin(id, User.GetUserId()) ||
                    await _hikeMemberService.AccessAsMember(id, User.GetUserId()))
-                {
+                    {
                     await _hikeMemberService.Delete(id);
                     return Ok();
                 }

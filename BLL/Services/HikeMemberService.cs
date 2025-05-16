@@ -32,6 +32,14 @@ namespace BLL.Services
             return dto;
         }
 
+        public async Task<HikeMemberGetDTO> GetByHikeUserId(long hikeId, long userId)
+        {
+            var hikeMember = await _repository.GetOneWithFilterAsync(hm => hm.UserId.Equals(userId) && hm.HikeId.Equals(hikeId))
+                ?? throw new Exception($"HikeMember not found");
+            var dto = _mapper.Map<HikeMemberGetDTO>(hikeMember);
+            return dto;
+        }
+
         public async Task<HikeMemberGetFullDTO> GetFullById(long id)
         {
             var hikeMember = await _repository.GetByIdAsync(id)
@@ -94,13 +102,27 @@ namespace BLL.Services
             return dtos;
         }
 
-        public async Task<bool> AccessAsAdmin(long hikeId, long userId)
+        public async Task<bool> AccessAsAdmin(long hikeMemberId, long userId)
+        {
+            var hikeMember = await this.GetById(hikeMemberId);
+            var hikeService = _serviceProvider.GetService<IHikeService>();
+            return await hikeService.AccessAsAdmin(hikeMember.HikeId, userId);
+        }
+
+        public async Task<bool> AccessAsAdminByHikeId(long hikeId, long userId)
         {
             var hikeService = _serviceProvider.GetService<IHikeService>();
             return await hikeService.AccessAsAdmin(hikeId, userId);
         }
 
-        public async Task<bool> AccessAsMember(long hikeId, long userId)
+        public async Task<bool> AccessAsMember(long hikeMemberId, long userId)
+        {
+            var hikeMember = await this.GetById(hikeMemberId);
+            var hikeService = _serviceProvider.GetService<IHikeService>();
+            return await hikeService.AccessAsMember(hikeMemberId, userId);
+        }
+
+        public async Task<bool> AccessAsMemberByHikeId(long hikeId, long userId)
         {
             var hikeService = _serviceProvider.GetService<IHikeService>();
             return await hikeService.AccessAsMember(hikeId, userId);

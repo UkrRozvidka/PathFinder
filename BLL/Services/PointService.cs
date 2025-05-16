@@ -30,16 +30,19 @@ namespace BLL.Services
             return _mapper.Map<PointGetDTO>(point);
         }
 
-        public async Task<long> Create(PointCreateDTO dto)
+        public async Task<long> Create(PointCreateDTO dto, long userId)
         {
             if (dto is null) throw new ArgumentNullException("Dto cannot be null");
-            if (!await IsAllowablePriority(dto.HikeMemberId, dto.Priority))
+            var hikeMember = await _hikeMemberService.Value.GetByHikeUserId(dto.HikeId, userId) 
+                ?? throw new Exception("HikeMember not found.");
+            if (!await IsAllowablePriority(hikeMember.Id, dto.Priority))
                 throw new Exception("The priority should not be repeated and should be between 1 and 10");
-
-            var hikeMember = await _hikeMemberService.Value.GetById(dto.HikeMemberId)
-                ?? throw new Exception("Incorrect hikeMember id.");
-
-            var point = _mapper.Map<Point>(dto);
+            var point = new Point()
+            {
+                GeoPoint = dto.GeoPoint,
+                Priority = dto.Priority,
+                HikeMemberId = hikeMember.Id
+            };
             return await _repository.AddAsync(point);
         }
 
@@ -53,7 +56,8 @@ namespace BLL.Services
             if (!await IsAllowablePriority(point.HikeMemberId, dto.Priority))
                 throw new Exception("The priority should not be repeated and should be between 1 and 10");
 
-            point = _mapper.Map<Point>(dto);
+            point.Priority = dto.Priority;
+            point.GeoPoint = dto.GeoPoint;
             await _repository.UpdateAsync(point);
         }
 
@@ -77,10 +81,9 @@ namespace BLL.Services
             return await _hikeMemberService.Value.AccessAsMember(hikeMember.HikeId, userId);
         }
 
-        public async Task<bool> AccessAsMemberCreate(long hikeMemberId, long userId)
+        public async Task<bool> AccessAsMemberCreate(long hikeId, long userId)
         {
-            var hikeMember = await _hikeMemberService.Value.GetById(hikeMemberId);
-            return await _hikeMemberService.Value.AccessAsMember(hikeMember.HikeId, userId);
+            return await _hikeMemberService.Value.AccessAsMemberByHikeId(hikeId, userId);
         }
 
         private async Task<bool> IsAllowablePriority(long hikeMemberId, int priority)
@@ -92,3 +95,4 @@ namespace BLL.Services
         }
     }
 }
+            

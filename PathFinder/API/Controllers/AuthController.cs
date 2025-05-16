@@ -70,5 +70,26 @@ namespace API.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet("me")]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            try
+            {
+                var token = Request.Cookies["access_token"];
+                if (string.IsNullOrEmpty(token))
+                    return Unauthorized();
+
+                var user = await _userService.GetCurrentUserAsync(token);
+                if (user == null)
+                    return Unauthorized();
+
+                return Ok(user);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

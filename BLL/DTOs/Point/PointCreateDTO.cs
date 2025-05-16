@@ -6,6 +6,7 @@ namespace BLL.DTOs.Point
     {
         public GeoPoint GeoPoint {  get; set; }
         public int Priority { get; set; }
-        public long HikeMemberId { get; set; }
+        public long HikeId { get; set; }
+
     }
 }

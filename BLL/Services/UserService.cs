@@ -3,6 +3,7 @@ using BLL.DTOs.User;
 using BLL.Services.Contracts;
 using DAL.Entities;
 using DAL.Repository.Contracts;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -42,9 +43,33 @@ namespace BLL.Services
             var existingUser = await _repository.GetOneWithFilterAsync(u => u.UserName == dto.UserName);
             if (existingUser != null) throw new ArgumentNullException("User already exist");
             var user = _mapper.Map<User>(dto);
-            user.PasswordHash = HashPassword(dto.Password); 
+            user.PasswordHash = HashPassword(dto.Password);
             var userId = await _repository.AddAsync(user);
             return userId;
+        }
+
+        public async Task<UserGetDTO> GetCurrentUserAsync(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+                return null;
+
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+
+            if (jsonToken == null)
+                return null;
+
+            var userId = int.Parse(jsonToken.Claims.First(claim => claim.Type == ClaimTypes.NameIdentifier).Value);
+            var user = await this.GetById(userId);
+
+            if (user == null)
+                return null;
+
+            return new UserGetDTO
+            {
+                Id = user.Id,
+                UserName = user.UserName
+            };
         }
 
         public string GenerateJwtToken(User user)

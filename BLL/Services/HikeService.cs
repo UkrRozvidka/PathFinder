@@ -120,7 +120,7 @@ namespace BLL.Services
             var hike = await this.GetFullById(hikeId);
             foreach(var member in hike.HikeMembers)
             {
-                if (member.Id == userId) return true;
+                if (member.UserId == userId) return true;
             }
             return false;
         }

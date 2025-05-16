@@ -17,19 +17,19 @@ namespace API.API.Controllers
             _trackService = trackService;
         }
 
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<TrackGetDTO>> GetTrackById(long id)
-        //{
-        //    try
-        //    {
-        //        var track = await _trackService.GetById(id);
-        //        return Ok(track);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //}
+        [HttpGet("{id}")]
+        public async Task<ActionResult<TrackGetDTO>> GetTrackById(long id)
+        {
+            try
+            {
+                var track = await _trackService.GetById(id);
+                return Ok(track);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
         [HttpGet("{id}/download")]
         public async Task<IActionResult> DownloadGpx(long id)

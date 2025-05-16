@@ -57,8 +57,8 @@ namespace API.API.Controllers
         {
             try
             {
-                if (!await _pointService.AccessAsMemberCreate(dto.HikeMemberId, User.GetUserId())) return Forbid();
-                var id = await _pointService.Create(dto);
+                if (!await _pointService.AccessAsMemberCreate(dto.HikeId, User.GetUserId())) return Forbid();
+                var id = await _pointService.Create(dto, User.GetUserId());
                 return Ok(id); 
             }
             catch (Exception ex)
